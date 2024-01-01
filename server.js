@@ -46,24 +46,57 @@ app.get('/stores', (req, res) => {
 
 
 app.get('/products', (req, res) => {
-    // MySQL query to get products data
+    const query = 'SELECT * FROM product'; // Replace with your actual query
+    mysqlConnection.query(query, (error, results, fields) => {
+        if (error) {
+            return res.status(500).send('Error in database operation');
+        }
+        res.json(results);
+    });
 });
+
+
+const Manager = require('./models/manager'); // Assuming you have a Manager model
 
 app.get('/managers', (req, res) => {
-    // MongoDB query to get managers data
+    Manager.find({}, (error, managers) => {
+        if (error) {
+            return res.status(500).send('Error in database operation');
+        }
+        res.json(managers);
+    });
 });
+
 
 app.post('/updateStore', (req, res) => {
-    // Code to update store information
+    const { storeId, newInfo } = req.body; // Extract data from request body
+    // SQL query to update store information
+    // Implement the update logic here
 });
+
 
 app.delete('/deleteProduct/:id', (req, res) => {
-    // Code to delete a product
+    const productId = req.params.id;
+    const query = 'DELETE FROM product WHERE id = ?';
+    mysqlConnection.query(query, [productId], (error, results, fields) => {
+        if (error) {
+            return res.status(500).send('Error in database operation');
+        }
+        res.send('Product deleted successfully');
+    });
 });
 
+
 app.post('/addManager', (req, res) => {
-    // Code to add a new manager to MongoDB
+    const newManager = new Manager(req.body); // Assuming you have a Manager model
+    newManager.save((error, manager) => {
+        if (error) {
+            return res.status(500).send('Error in database operation');
+        }
+        res.json(manager);
+    });
 });
+
 
 // Error Handling
 app.use((req, res, next) => {
