@@ -35,7 +35,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/stores', (req, res) => {
-    const query = 'SELECT * FROM store'; // Replace with your actual query
+    const query = 'SELECT * FROM store'; 
     mysqlConnection.query(query, (error, results, fields) => {
         if (error) {
             return res.status(500).send('Error in database operation');
@@ -46,44 +46,43 @@ app.get('/stores', (req, res) => {
 
 
 app.get('/products', (req, res) => {
-    const query = 'SELECT * FROM product'; // Replace with your actual query
-    mysqlConnection.query(query, (error, results, fields) => {
-        if (error) {
-            return res.status(500).send('Error in database operation');
-        }
-        res.json(results);
+    mysqlConnection.query('SELECT * FROM product', (err, results, fields) => {
+      if (err) {
+        res.status(500).send('Error retrieving data from database');
+        return;
+      }
+      res.json(results);
     });
+  });
+
+
+const managerSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    _id: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    salary: {
+        type: Number,
+        required: true
+    },
+    // Add more fields as necessary
 });
 
+const Manager = mongoose.model('Manager', managerSchema);
 
-const Manager = require('./models/manager'); // Assuming you have a Manager model
 
-app.get('/managers', (req, res) => {
-    Manager.find({}, (error, managers) => {
-        if (error) {
-            return res.status(500).send('Error in database operation');
-        }
+app.get('/managers', async (req, res) => {
+    try {
+        const managers = await Manager.find({});
         res.json(managers);
-    });
-});
-
-
-app.post('/updateStore', (req, res) => {
-    const { storeId, newInfo } = req.body; // Extract data from request body
-    // SQL query to update store information
-    // Implement the update logic here
-});
-
-
-app.delete('/deleteProduct/:id', (req, res) => {
-    const productId = req.params.id;
-    const query = 'DELETE FROM product WHERE id = ?';
-    mysqlConnection.query(query, [productId], (error, results, fields) => {
-        if (error) {
-            return res.status(500).send('Error in database operation');
-        }
-        res.send('Product deleted successfully');
-    });
+    } catch (error) {
+        res.status(500).send('Error in database operation');
+    }
 });
 
 
